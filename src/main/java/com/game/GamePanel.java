@@ -24,6 +24,12 @@ public class GamePanel extends JPanel implements Runnable {
     
     // FPS
     int FPS = 60;
+    
+    // Game Objects
+    public KeyHandler keyH = new KeyHandler();
+    public Player player;
+    public Camera camera;
+    public TileManager tileM;
 
     public GamePanel(){
         //  Bildschirmgröße 
@@ -41,6 +47,15 @@ public class GamePanel extends JPanel implements Runnable {
         this.setPreferredSize(new Dimension(adjustedWidth, adjustedHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
+        
+        // Keyboard Input aktivieren
+        this.setFocusable(true);
+        this.addKeyListener(keyH);
+        
+        // Erstelle Game Objects
+        tileM = new TileManager(this);
+        player = new Player(this, keyH);
+        camera = new Camera(this, player);
     }
     
     public void startGameThread() {
@@ -69,39 +84,25 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
     public void update() {
-        // Game logic hier
+        // Update Player (Movement)
+        player.update();
+        
+        // Update Camera (folgt Player)
+        camera.update();
     }
     
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        // Aktuelle Panel-Größe verwenden
-        int panelWidth = getWidth();
-        int panelHeight = getHeight();
-        int cols = panelWidth / tileSize;
-        int rows = panelHeight / tileSize;
+        // Zeichne Map zuerst (Hintergrund)
+        tileM.draw(g);
         
-        // Zeichne Grid für Debug (kannst du später entfernen)
-        g.setColor(Color.DARK_GRAY);
-        for (int i = 0; i <= cols; i++) {
-            g.drawLine(i * tileSize, 0, i * tileSize, panelHeight);
-        }
-        for (int i = 0; i <= rows; i++) {
-            g.drawLine(0, i * tileSize, panelWidth, i * tileSize);
-        }
+        // Zeichne Player darüber
+        player.draw(g);
         
-        // Hier deine coolen Grafiken zeichnen!
-        // Beispiel: Ein paar farbige Tiles
-        g.setColor(Color.CYAN);
-        g.fillRect(5 * tileSize, 5 * tileSize, tileSize, tileSize);
-        
-        g.setColor(Color.MAGENTA);
-        g.fillRect(10 * tileSize, 10 * tileSize, tileSize, tileSize);
-        
-        g.setColor(Color.YELLOW);
-        g.fillRect(15 * tileSize, 15 * tileSize, tileSize, tileSize);
-        
-        // NICHT g.dispose() aufrufen! Swing verwaltet das Graphics-Objekt selbst
+        // Optional: Debug Info
+        // g.setColor(Color.WHITE);
+        // g.drawString("Player X: " + player.worldX / tileSize + " Y: " + player.worldY / tileSize, 10, 20);
     }
 }
